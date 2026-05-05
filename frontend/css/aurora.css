@@ -593,13 +593,47 @@ tbody td { padding: 12px 13px; font-size: 13.5px; vertical-align: middle; }
 
 /* ═══ RESPONSIVE ═══ */
 @media (max-width: 1024px) {
-  .login-split { grid-template-columns: 1fr; }
-  .login-left { display: none; }
   .g2, .g3, .g12, .g21 { grid-template-columns: 1fr; }
   .stats-row { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 768px) {
+  /* ── Login: stack vertically, show both panels ── */
+  .login-split {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .login-left {
+    display: flex !important;
+    padding: 36px 24px 32px;
+    min-height: auto;
+  }
+
+  .brand { margin-bottom: 28px; }
+
+  .hero-heading {
+    font-size: clamp(28px, 8vw, 40px);
+    letter-spacing: -1.5px;
+    margin-bottom: 14px;
+  }
+
+  .hero-sub { font-size: 14px; margin-bottom: 22px; }
+
+  .feature-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
+  .feat-chip { font-size: 12px; padding: 8px 10px; }
+
+  .metric-row { gap: 20px; flex-wrap: wrap; }
+  .metric-val { font-size: 22px; }
+
+  .login-right { padding: 28px 20px 40px; }
+
+  /* ── Dashboard ── */
   .app { display: block; }
   .sidebar { transform: translateX(-100%); transition: transform var(--t3); }
   .sidebar.open { transform: translateX(0); box-shadow: 10px 0 40px rgba(0,0,0,0.15); }
@@ -610,3 +644,8 @@ tbody td { padding: 12px 13px; font-size: 13.5px; vertical-align: middle; }
   .hamburger { display: flex; }
 }
 
+@media (max-width: 400px) {
+  .feature-grid { grid-template-columns: 1fr; }
+  .metric-row { gap: 16px; }
+  .login-left { padding: 28px 18px; }
+}
