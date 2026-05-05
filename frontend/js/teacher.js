@@ -17,6 +17,7 @@ function onSectionLoad(s) {
     'homework-review': loadHwReview,
     'student-monitor': loadStudentMonitor,
     predictions: loadPredictions,
+    'pending-approvals': loadPendingStudents,
   })[s]?.();
 }
 
@@ -403,3 +404,54 @@ async function loadPredictions() {
       </tr>`;
     }).join('') + '</tbody></table></div>';
 }
+/* PENDING APPROVALS */
+async function loadPendingStudents() {
+  const token = localStorage.getItem('token');
+  try {
+    const res = await fetch('/api/auth/pending-students', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const data = await res.json();
+    const tbody = document.getElementById('pendingStudentsBody');
+    const badge = document.getElementById('pendingBadge');
+    if (!tbody) return;
+
+    if (!data.students || data.students.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px">No pending approvals ✅</td></tr>';
+      if (badge) badge.textContent = '0';
+      return;
+    }
+
+    if (badge) badge.textContent = data.students.length;
+    tbody.innerHTML = data.students.map(s => `
+      <tr>
+        <td>${s.name}</td>
+        <td>${s.email}</td>
+        <td>${s.studentId || '-'}</td>
+        <td>${s.class || '-'}</td>
+        <td>${new Date(s.createdAt).toLocaleDateString()}</td>
+        <td>
+          <button class="btn btn-teal btn-sm" onclick="approveStudent('${s._id||s.id}', 'approved')">✅ Approve</button>
+          <button class="btn btn-ghost btn-sm" style="margin-left:8px" onclick="approveStudent('${s._id||s.id}', 'rejected')">❌ Reject</button>
+        </td>
+      </tr>
+    `).join('');
+  } catch(e) { console.error(e); }
+}
+
+async function approveStudent(studentId, action) {
+  const token = localStorage.getItem('token');
+  const res = await fetch(`/api/auth/approve/${studentId}`, {
+    method: 'PUT',
+    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action })
+  });
+  const data = await res.json();
+  if (data.success) {
+    alert(action === 'approved' ? '✅ Student approved!' : '❌ Student rejected!');
+    loadPendingStudents();
+  }
+}
+
+// Load pending on startup
+loadPendingStudents();

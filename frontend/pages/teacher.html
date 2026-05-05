@@ -26,6 +26,7 @@
       <div class="sb-section-label">Overview</div>
       <div class="nav-link active" data-section="dashboard" onclick="showSection('dashboard')"><span class="nav-icon">🏠</span> Dashboard</div>
       <div class="nav-link" data-section="announcements" onclick="showSection('announcements')"><span class="nav-icon">📢</span> Announcements</div>
+      <div class="nav-link" data-section="pending-approvals" onclick="showSection('pending-approvals')"><span class="nav-icon">⏳</span> Pending Approvals <span class="nav-badge" id="pendingBadge">0</span></div>
       <div class="sb-section-label">Tests</div>
       <div class="nav-link" data-section="create-test" onclick="showSection('create-test')"><span class="nav-icon">➕</span> Create Test</div>
       <div class="nav-link" data-section="manage-tests" onclick="showSection('manage-tests')"><span class="nav-icon">📝</span> Manage Tests</div>
@@ -179,7 +180,21 @@
           </div>
         </div>
       </div>
-
+<!-- PENDING APPROVALS -->
+      <div class="section" id="sec-pending-approvals">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">⏳ Pending Student Approvals</div>
+            <button class="btn btn-teal btn-sm" onclick="loadPendingStudents()">🔄 Refresh</button>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Name</th><th>Email</th><th>Student ID</th><th>Class</th><th>Registered</th><th>Actions</th></tr></thead>
+              <tbody id="pendingStudentsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
       <!-- AI PREDICTIONS -->
       <div class="section" id="sec-predictions">
         <div class="card">
