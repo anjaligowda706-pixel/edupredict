@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduPredict AI — Light Edition</title>
+<link rel="stylesheet" href="css/aurora.css">
+</head>
+<body class="login-page">
+<canvas id="aurora-canvas"></canvas>
+
+<div class="login-split">
+  <!-- LEFT: Hero -->
+  <div class="login-left">
+    <div class="brand">
+      <div class="brand-icon">🌿</div>
+      <div class="brand-name">EduPredict<em>AI</em></div>
+    </div>
+
+    <div class="hero-heading">
+      <span class="line-1">Illuminate</span>
+      <span class="line-2">Every Student's</span>
+      <span class="line-1">Potential</span>
+    </div>
+
+    <p class="hero-sub">
+      AI-powered academic intelligence for modern schools. Predict outcomes, prevent failures, celebrate achievements — all in one place.
+    </p>
+
+    <div class="feature-grid">
+      <div class="feat-chip"><span class="feat-icon">🤖</span> AI Prediction Engine</div>
+      <div class="feat-chip"><span class="feat-icon">⏱️</span> Live Timed Exams</div>
+      <div class="feat-chip"><span class="feat-icon">📊</span> Real-time Analytics</div>
+      <div class="feat-chip"><span class="feat-icon">📁</span> File Submissions</div>
+      <div class="feat-chip"><span class="feat-icon">🏆</span> Leaderboards</div>
+      <div class="feat-chip"><span class="feat-icon">📢</span> Announcements</div>
+    </div>
+
+    <div class="metric-row">
+      <div>
+        <div class="metric-val" id="cnt-students">35+</div>
+        <div class="metric-label">Students</div>
+      </div>
+      <div>
+        <div class="metric-val" id="cnt-tests">7+</div>
+        <div class="metric-label">Active Tests</div>
+      </div>
+      <div>
+        <div class="metric-val">3</div>
+        <div class="metric-label">Role Types</div>
+      </div>
+      <div>
+        <div class="metric-val">AI</div>
+        <div class="metric-label">Powered</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Auth -->
+  <div class="login-right">
+    <div class="auth-card">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('login',this)">Sign In</button>
+        <button class="tab-btn" onclick="switchTab('register',this)">Register</button>
+      </div>
+
+      <!-- LOGIN -->
+      <form id="loginForm" onsubmit="doLogin(event)">
+        <div class="auth-title">Welcome back 👋</div>
+        <div class="auth-sub">Sign in to your EduPredict account</div>
+
+        <div class="demo-box">
+          <div class="demo-label">⚡ Quick Access Demo</div>
+          <div class="demo-row">
+            <button type="button" class="demo-pill admin" onclick="fillLogin('admin@school.edu','admin123')">👨‍💼 Admin</button>
+            <button type="button" class="demo-pill teacher" onclick="fillLogin('sarah@school.edu','teacher123')">👩‍🏫 Teacher</button>
+            <button type="button" class="demo-pill student" onclick="fillLogin('alice@school.edu','student123')">🎓 Student</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Email Address</label>
+          <input type="email" class="field-input" id="loginEmail" placeholder="your@school.edu" required>
+        </div>
+        <div class="field">
+          <label class="field-label">Password</label>
+          <div class="pass-wrap">
+            <input type="password" class="field-input" id="loginPass" placeholder="••••••••" required>
+            <button type="button" class="eye-toggle" onclick="toggleEye('loginPass',this)">👁</button>
+          </div>
+        </div>
+        <button type="submit" class="btn-submit" id="loginBtn">Sign In →</button>
+        <div id="loginMsg" class="form-msg hidden"></div>
+      </form>
+
+      <!-- REGISTER -->
+      <form id="registerForm" class="hidden" onsubmit="doRegister(event)">
+        <div class="auth-title">Create Account</div>
+        <div class="auth-sub">Join EduPredict AI today</div>
+        <div class="field">
+          <label class="field-label">Full Name</label>
+          <input type="text" class="field-input" id="regName" placeholder="Your full name" required>
+        </div>
+        <div class="field">
+          <label class="field-label">Email Address</label>
+          <input type="email" class="field-input" id="regEmail" placeholder="your@school.edu" required>
+        </div>
+        <div class="field">
+          <label class="field-label">Role</label>
+          <select class="field-select" id="regRole" onchange="toggleRegFields()">
+            <option value="student">Student</option>
+            <option value="teacher">Teacher</option>
+          </select>
+        </div>
+        <div id="regStudentFields">
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label">Student ID</label>
+              <input class="field-input" id="regStudentId" placeholder="STU001">
+            </div>
+            <div class="field">
+              <label class="field-label">Class</label>
+              <input class="field-input" id="regClass" placeholder="10">
+            </div>
+          </div>
+        </div>
+        <div id="regTeacherFields" class="hidden">
+          <div class="field">
+            <label class="field-label">Teacher ID</label>
+            <input class="field-input" id="regTeacherId" placeholder="TCH001">
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">Password</label>
+          <input type="password" class="field-input" id="regPass" placeholder="Min 6 characters" required>
+        </div>
+        <button type="submit" class="btn-submit" id="registerBtn">Create Account →</button>
+        <div id="registerMsg" class="form-msg hidden"></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Aurora Particle Canvas — light palette ──
+(function() {
+  const canvas = document.getElementById('aurora-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [], time = 0;
+
+  function resize() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function rnd(a,b) { return Math.random()*(b-a)+a; }
+
+  class Particle {
+    constructor() { this.reset(); }
+    reset() {
+      this.x = rnd(0, W); this.y = rnd(0, H);
+      this.vx = rnd(-0.2, 0.2); this.vy = rnd(-0.35, -0.08);
+      this.r = rnd(1, 2.5); this.life = rnd(0.2, 0.7);
+      this.decay = rnd(0.002, 0.005);
+      // Light palette: teal, amber, sage greens
+      const hues = [168, 172, 40, 155, 165];
+      this.hue = hues[Math.floor(rnd(0, hues.length))];
+    }
+    update() {
+      this.x += this.vx + Math.sin(time*0.008 + this.y*0.01)*0.25;
+      this.y += this.vy;
+      this.life -= this.decay;
+      if (this.life <= 0 || this.y < -20) this.reset();
+    }
+    draw() {
+      ctx.save();
+      ctx.globalAlpha = this.life * 0.45;
+      ctx.fillStyle = `hsl(${this.hue}, 65%, 55%)`;
+      ctx.shadowBlur = 6;
+      ctx.shadowColor = `hsl(${this.hue}, 80%, 65%)`;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  for (let i = 0; i < 80; i++) particles.push(new Particle());
+
+  // Soft aurora streaks in light palette
+  let streaks = Array.from({length:4}, () => ({
+    y: rnd(H*0.1, H*0.7), phase: rnd(0, Math.PI*2),
+    speed: rnd(0.004, 0.015), amp: rnd(25,60),
+    hue: [168, 42, 155, 172][Math.floor(rnd(0,4))]
+  }));
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    streaks.forEach((s) => {
+      const y = s.y + Math.sin(time*s.speed + s.phase) * s.amp;
+      const grad = ctx.createLinearGradient(0, y-25, 0, y+25);
+      grad.addColorStop(0, 'transparent');
+      grad.addColorStop(0.5, `hsla(${s.hue}, 70%, 55%, 0.05)`);
+      grad.addColorStop(1, 'transparent');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, y-25, W, 50);
+    });
+
+    particles.forEach(p => { p.update(); p.draw(); });
+    time++;
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── Auth Logic (unchanged) ──
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('loginForm').classList.toggle('hidden', tab !== 'login');
+  document.getElementById('registerForm').classList.toggle('hidden', tab !== 'register');
+}
+
+function fillLogin(e, p) {
+  document.getElementById('loginEmail').value = e;
+  document.getElementById('loginPass').value = p;
+}
+
+function toggleEye(id, btn) {
+  const el = document.getElementById(id);
+  el.type = el.type === 'password' ? 'text' : 'password';
+  btn.textContent = el.type === 'password' ? '👁' : '🙈';
+}
+
+function toggleRegFields() {
+  const r = document.getElementById('regRole').value;
+  document.getElementById('regStudentFields').classList.toggle('hidden', r !== 'student');
+  document.getElementById('regTeacherFields').classList.toggle('hidden', r !== 'teacher');
+}
+
+async function doLogin(e) {
+  e.preventDefault();
+  const btn = document.getElementById('loginBtn');
+  const msg = document.getElementById('loginMsg');
+  btn.classList.add('loading');
+  btn.textContent = '';
+  msg.classList.add('hidden');
+
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: document.getElementById('loginEmail').value, password: document.getElementById('loginPass').value })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    const role = data.user.role;
+    window.location.href = `/pages/${role}.html`;
+  } catch(err) {
+    msg.textContent = err.message;
+    msg.className = 'form-msg error';
+    btn.classList.remove('loading');
+    btn.textContent = 'Sign In →';
+  }
+}
+
+async function doRegister(e) {
+  e.preventDefault();
+  const btn = document.getElementById('registerBtn');
+  const msg = document.getElementById('registerMsg');
+  btn.classList.add('loading'); btn.textContent = '';
+
+  const role = document.getElementById('regRole').value;
+  const body = {
+    name: document.getElementById('regName').value,
+    email: document.getElementById('regEmail').value,
+    password: document.getElementById('regPass').value,
+    role,
+    studentId: document.getElementById('regStudentId')?.value,
+    class: document.getElementById('regClass')?.value,
+    teacherId: document.getElementById('regTeacherId')?.value
+  };
+
+  try {
+    const res = await fetch('/api/auth/register', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    msg.textContent = '✅ Account created! Redirecting...';
+    msg.className = 'form-msg success';
+    setTimeout(() => window.location.href = `/pages/${data.user.role}.html`, 1400);
+  } catch(err) {
+    msg.textContent = err.message;
+    msg.className = 'form-msg error';
+    btn.classList.remove('loading');
+    btn.textContent = 'Create Account →';
+  }
+}
+
+// Auto redirect (unchanged)
+const u = localStorage.getItem('user');
+if (u && localStorage.getItem('token')) {
+  const user = JSON.parse(u);
+  window.location.href = `/pages/${user.role}.html`;
+}
+</script>
+</body>
+</html>

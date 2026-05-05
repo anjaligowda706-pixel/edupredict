@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — EduPredict AI</title>
+<link rel="stylesheet" href="../css/aurora.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<canvas id="aurora-canvas"></canvas>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <div class="sb-brand-icon">🌌</div>
+      <div class="sb-brand-text">EduPredict<span>AI</span></div>
+    </div>
+    <div class="sb-user">
+      <div class="sb-avatar av-lav" id="sbAvatar">A</div>
+      <div>
+        <div class="sb-username" id="sbName">Admin</div>
+        <div class="sb-role">System Admin</div>
+      </div>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-section-label">Overview</div>
+      <div class="nav-link active" data-section="dashboard" onclick="showSection('dashboard')"><span class="nav-icon">🏠</span> Dashboard</div>
+      <div class="nav-link" data-section="analytics" onclick="showSection('analytics')"><span class="nav-icon">📊</span> Analytics</div>
+      <div class="sb-section-label">Management</div>
+      <div class="nav-link" data-section="students" onclick="showSection('students')"><span class="nav-icon">🎓</span> Students</div>
+      <div class="nav-link" data-section="teachers" onclick="showSection('teachers')"><span class="nav-icon">👩‍🏫</span> Teachers</div>
+      <div class="nav-link" data-section="tests" onclick="showSection('tests')"><span class="nav-icon">📝</span> Tests</div>
+      <div class="nav-link" data-section="announcements" onclick="showSection('announcements')"><span class="nav-icon">📢</span> Announcements</div>
+      <div class="sb-section-label">AI</div>
+      <div class="nav-link" data-section="ai-insights" onclick="showSection('ai-insights')"><span class="nav-icon">🤖</span> AI Insights</div>
+      <div class="nav-link" data-section="settings" onclick="showSection('settings')"><span class="nav-icon">⚙️</span> Settings</div>
+    </nav>
+    <div class="sb-footer">
+      <button class="btn-logout" onclick="logout()">🚪 Sign Out</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title" id="topbarTitle">Admin Dashboard</div>
+        <div class="topbar-sub" id="topbarSub">System Overview</div>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-teal btn-sm" onclick="openModal('addUserModal')">➕ Add User</button>
+        <button class="btn btn-ghost btn-sm" onclick="openModal('bulkModal')">📥 Bulk Import</button>
+        <button class="icon-btn" id="ann-bell-btn" onclick="ANN.toggle()" style="position:relative">
+  🔔
+  <span id="ann-bell-dot" style="display:none;position:absolute;top:5px;right:5px;width:8px;height:8px;border-radius:50%;background:#be123c;border:2px solid white"></span>
+</button>
+        
+      </div>
+    </div>
+
+    <div class="notif-panel" id="notifPanel">
+      <div class="notif-head"><span class="notif-head-title">Notifications</span></div>
+      <div class="notif-list" id="notifList"></div>
+    </div>
+
+    <div class="page">
+
+      <!-- DASHBOARD -->
+      <div class="section active" id="sec-dashboard">
+        <div class="stats-row" id="adminStats"></div>
+        <div class="g2">
+          <div class="card">
+            <div class="card-head"><div class="card-title">📅 Weekly Activity</div></div>
+            <div class="chart-wrap" style="height:240px"><canvas id="chartWeekly"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><div class="card-title">🎯 Risk Distribution</div></div>
+            <div class="chart-wrap" style="height:240px"><canvas id="chartAdminRisk"></canvas></div>
+          </div>
+        </div>
+        <div class="g2">
+          <div class="card">
+            <div class="card-head"><div class="card-title">📊 Subject Performance</div></div>
+            <div class="chart-wrap" style="height:220px"><canvas id="chartSubjPerf"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">👥 Recent Users</div>
+              <button class="btn btn-ghost btn-sm" onclick="showSection('students')">View All</button>
+            </div>
+            <div id="recentUsersEl"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ANALYTICS -->
+      <div class="section" id="sec-analytics">
+        <div class="stats-row" id="analyticsStats"></div>
+        <div class="g2">
+          <div class="card"><div class="card-head"><div class="card-title">📅 Attendance Distribution</div></div><div class="chart-wrap" style="height:270px"><canvas id="chartAtt"></canvas></div></div>
+          <div class="card"><div class="card-head"><div class="card-title">📁 Homework by Subject</div></div><div class="chart-wrap" style="height:270px"><canvas id="chartHwSubj"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">📈 Score Distribution</div></div>
+          <div class="chart-wrap" style="height:220px"><canvas id="chartScoreDist"></canvas></div>
+        </div>
+      </div>
+
+      <!-- STUDENTS -->
+      <div class="section" id="sec-students">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">🎓 Students Management</div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+              <div class="search-bar">
+                <span class="search-icon">🔍</span>
+                <input type="text" placeholder="Search..." oninput="filterAdminStu(this.value)">
+              </div>
+              <button class="btn btn-teal btn-sm" onclick="setAddRole('student');openModal('addUserModal')">➕ Add</button>
+              <button class="btn btn-ghost btn-sm" onclick="openModal('bulkModal')">📥 Import</button>
+            </div>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Student</th><th>ID</th><th>Class</th><th>Email</th><th>Attendance</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="adminStuBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TEACHERS -->
+      <div class="section" id="sec-teachers">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">👩‍🏫 Teachers Management</div>
+            <button class="btn btn-teal btn-sm" onclick="setAddRole('teacher');openModal('addUserModal')">➕ Add Teacher</button>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Teacher</th><th>ID</th><th>Email</th><th>Subjects</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="adminTeachBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TESTS -->
+      <div class="section" id="sec-tests">
+        <div class="card">
+          <div class="card-head"><div class="card-title">📝 All Tests</div></div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Title</th><th>Subject</th><th>Duration</th><th>Questions</th><th>Class</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="adminTestsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ANNOUNCEMENTS -->
+      <div class="section" id="sec-announcements">
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-head"><div class="card-title">📢 Create Announcement</div></div>
+          <form onsubmit="postAdminAnn(event)" style="display:grid;gap:14px">
+            <div class="form-grid">
+              <div><label class="f-label">Title</label><input class="f-input" id="adminAnnTitle" required placeholder="Title"></div>
+              <div>
+                <label class="f-label">Priority</label>
+                <select class="f-select" id="adminAnnPriority"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select>
+              </div>
+              <div>
+                <label class="f-label">Target Audience</label>
+                <select class="f-select" id="adminAnnTarget"><option value="all">All</option><option value="student">Students Only</option><option value="teacher">Teachers Only</option></select>
+              </div>
+              <div class="full"><label class="f-label">Message</label><textarea class="f-textarea" id="adminAnnBody" required placeholder="Write announcement..."></textarea></div>
+            </div>
+            <button type="submit" class="btn btn-teal" style="width:200px">📢 Post</button>
+          </form>
+        </div>
+        <div id="adminAnnList"></div>
+      </div>
+
+      <!-- AI INSIGHTS -->
+      <div class="section" id="sec-ai-insights">
+        <div class="stats-row" id="aiSummaryStats"></div>
+        <div class="card">
+          <div class="card-head">
+            <div><div class="card-title">🤖 AI Risk Intelligence — All Students</div><div class="card-sub">Sorted by predicted score (lowest first)</div></div>
+            <button class="btn btn-teal btn-sm" onclick="loadAiInsights()">🔄 Refresh</button>
+          </div>
+          <div id="aiInsightTable"></div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="section" id="sec-settings">
+        <div class="g2">
+          <div class="card">
+            <div class="card-head"><div class="card-title">⚙️ System Settings</div></div>
+            <div style="display:grid;gap:14px">
+              <div><label class="f-label">School Name</label><input class="f-input" value="EduPredict Academy" id="schoolName"></div>
+              <div><label class="f-label">Academic Year</label><input class="f-input" value="2024-2025" id="acadYear"></div>
+              <div><label class="f-label">Max Students/Class</label><input type="number" class="f-input" value="45"></div>
+              <div><label class="f-label">AI Model Weight (Test %)</label><input type="number" class="f-input" value="50" min="0" max="100"></div>
+              <button class="btn btn-teal" onclick="toast('Settings saved!','success')" style="padding:12px">💾 Save Settings</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><div class="card-title">📊 System Info</div></div>
+            <div id="sysInfoEl"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal-bg" id="addUserModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">➕ Add New User</div>
+      <button class="btn-x" onclick="closeModal('addUserModal')">✕</button>
+    </div>
+    <form onsubmit="addUser(event)" style="display:grid;gap:14px">
+      <div class="form-grid">
+        <div class="full"><label class="f-label">Full Name</label><input class="f-input" id="newName" required placeholder="Full name"></div>
+        <div><label class="f-label">Email</label><input type="email" class="f-input" id="newEmail" required placeholder="email@school.edu"></div>
+        <div>
+          <label class="f-label">Role</label>
+          <select class="f-select" id="newRole" onchange="toggleAddFields()">
+            <option value="student">Student</option><option value="teacher">Teacher</option>
+          </select>
+        </div>
+      </div>
+      <div id="addStuFields">
+        <div class="form-grid">
+          <div><label class="f-label">Student ID</label><input class="f-input" id="newStuId" placeholder="STU001"></div>
+          <div><label class="f-label">Class</label><input class="f-input" id="newClass" placeholder="10"></div>
+          <div><label class="f-label">Section</label><input class="f-input" id="newSection" placeholder="A"></div>
+          <div><label class="f-label">Attendance %</label><input type="number" class="f-input" id="newAtt" value="80" min="0" max="100"></div>
+        </div>
+      </div>
+      <div id="addTeachFields" style="display:none">
+        <div class="form-grid">
+          <div><label class="f-label">Teacher ID</label><input class="f-input" id="newTeachId" placeholder="TCH001"></div>
+          <div><label class="f-label">Subjects (comma separated)</label><input class="f-input" id="newSubjects" placeholder="Mathematics, Physics"></div>
+        </div>
+      </div>
+      <div><label class="f-label">Password</label><input type="password" class="f-input" id="newPass" placeholder="Default: password123"></div>
+      <button type="submit" class="btn btn-teal" style="padding:12px">✅ Create Account</button>
+      <div id="addUserMsg"></div>
+    </form>
+  </div>
+</div>
+
+<!-- Bulk Import Modal -->
+<div class="modal-bg" id="bulkModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">📥 Bulk Student Import</div>
+      <button class="btn-x" onclick="closeModal('bulkModal')">✕</button>
+    </div>
+    <div class="alert alert-lav" style="margin-bottom:14px"><span>ℹ️</span><span>CSV format: Name, Email, StudentID, Class, Section, Attendance%<br>Default password: student123</span></div>
+    <label class="f-label">CSV Data</label>
+    <textarea class="f-textarea" id="csvData" style="min-height:200px;font-family:monospace;font-size:12px" placeholder="Alice Johnson,alice@school.edu,STU101,10,A,88&#10;Bob Smith,bob@school.edu,STU102,10,B,75&#10;Carol Davis,carol@school.edu,STU103,11,A,92"></textarea>
+    <button class="btn btn-teal" onclick="doBulkImport()" style="width:100%;padding:12px;margin-top:14px">📤 Import Students</button>
+    <div id="bulkResult" style="margin-top:12px"></div>
+  </div>
+</div>
+
+<div class="toast-box" id="toastBox"></div>
+<script src="../js/app.js"></script>
+<script src="../js/admin.js"></script>
+<div id="ann-panel"></div>
+<div id="ann-toasts"></div>
+<script src="../js/announce.js"></script>
+</body>
+</html>

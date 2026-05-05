@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student — EduPredict AI</title>
+<link rel="stylesheet" href="../css/aurora.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<canvas id="aurora-canvas"></canvas>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <div class="sb-brand-icon">🌌</div>
+      <div class="sb-brand-text">EduPredict<span>AI</span></div>
+    </div>
+    <div class="sb-user">
+      <div class="sb-avatar av-teal" id="sbAvatar">S</div>
+      <div>
+        <div class="sb-username" id="sbName">Student</div>
+        <div class="sb-role">Student</div>
+      </div>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-section-label">Home</div>
+      <div class="nav-link active" data-section="dashboard" onclick="showSection('dashboard')">
+        <span class="nav-icon">🏠</span> Dashboard
+      </div>
+      <div class="nav-link" data-section="announcements" onclick="showSection('announcements')">
+        <span class="nav-icon">📢</span> Announcements
+        <span class="nav-badge hidden" id="annBadge">0</span>
+      </div>
+      <div class="sb-section-label">Academics</div>
+      <div class="nav-link" data-section="tests" onclick="showSection('tests')">
+        <span class="nav-icon">📝</span> My Tests
+      </div>
+      <div class="nav-link" data-section="exam" onclick="showSection('exam')">
+        <span class="nav-icon">⏱️</span> Take Exam
+      </div>
+      <div class="nav-link" data-section="homework" onclick="showSection('homework')">
+        <span class="nav-icon">📁</span> Homework
+      </div>
+      <div class="sb-section-label">Insights</div>
+      <div class="nav-link" data-section="performance" onclick="showSection('performance')">
+        <span class="nav-icon">📊</span> Performance
+      </div>
+      <div class="nav-link" data-section="prediction" onclick="showSection('prediction')">
+        <span class="nav-icon">🤖</span> AI Prediction
+      </div>
+      <div class="nav-link" data-section="leaderboard" onclick="showSection('leaderboard')">
+        <span class="nav-icon">🏆</span> Leaderboard
+      </div>
+      <div class="nav-link" data-section="schedule" onclick="showSection('schedule')">
+        <span class="nav-icon">📅</span> Schedule
+      </div>
+    </nav>
+    <div class="sb-footer">
+      <button class="btn-logout" onclick="logout()">🚪 Sign Out</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title" id="topbarTitle">Dashboard</div>
+        <div class="topbar-sub" id="topbarSub">Your academic overview</div>
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn" id="notifBtn" onclick="toggleNotif()">
+          🔔
+          <span class="badge-dot" id="notifDot" style="display:none"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- NOTIFICATION PANEL -->
+    <div class="notif-panel" id="notifPanel">
+      <div class="notif-head">
+        <span class="notif-head-title">Notifications</span>
+        <button class="btn btn-ghost btn-sm" onclick="markAllRead()">Mark all read</button>
+      </div>
+      <div class="notif-list" id="notifList"></div>
+    </div>
+
+    <div class="page">
+
+      <!-- ── DASHBOARD ── -->
+      <div class="section active" id="sec-dashboard">
+        <div class="stats-row" id="dashStats"></div>
+        <div class="g21">
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title">📈 Performance Timeline</div>
+                <div class="card-sub">Test scores over time</div>
+              </div>
+            </div>
+            <div class="chart-wrap" style="height:220px"><canvas id="chartTimeline"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-title" style="margin-bottom:16px">🎯 Subject Radar</div>
+            <div class="chart-wrap" style="height:220px"><canvas id="chartRadar"></canvas></div>
+          </div>
+        </div>
+        <div class="g2">
+          <div class="card">
+            <div class="card-head"><div class="card-title">🕐 Recent Results</div></div>
+            <div id="dashRecent"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><div class="card-title">⚡ Alerts & Tips</div></div>
+            <div id="dashAlerts"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ANNOUNCEMENTS ── -->
+      <div class="section" id="sec-announcements">
+        <div id="annList"></div>
+        
+      </div>
+
+      <!-- ── TESTS ── -->
+      <div class="section" id="sec-tests">
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-head">
+            <div class="card-title">📝 Available Tests</div>
+            <div class="search-bar" style="width:260px">
+              <span class="search-icon">🔍</span>
+              <input type="text" placeholder="Search tests..." oninput="filterTests(this.value)">
+            </div>
+          </div>
+          <div id="testCards"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">✅ My Submissions</div></div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Subject</th><th>Score</th><th>%</th><th>Grade</th><th>Time Taken</th><th>Date</th></tr></thead>
+              <tbody id="submissionsTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── EXAM ── -->
+      <div class="section" id="sec-exam">
+        <div id="examPickScreen">
+          <div class="card" style="margin-bottom:20px">
+            <div class="card-head">
+              <div class="card-title">⏱️ Available Exams</div>
+              <div class="card-sub">Select an exam to begin</div>
+            </div>
+            <div id="examCards" class="g-auto" style="margin-top:4px"></div>
+          </div>
+        </div>
+        <div id="examScreen" style="display:none">
+          <div style="display:grid;grid-template-columns:1fr 280px;gap:20px;align-items:start">
+            <div>
+              <div class="card" style="margin-bottom:16px">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+                  <div>
+                    <div class="card-title" id="examTitle">Exam</div>
+                    <div class="card-sub" id="examSubject"></div>
+                  </div>
+                  <div id="examProgressText" style="font-family:var(--font-display);font-size:13px;color:var(--text-3)"></div>
+                </div>
+              </div>
+              <div id="examQuestions"></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px">
+                <button class="btn btn-ghost btn-lg" onclick="clearAllAnswers()">🔄 Clear All</button>
+                <button class="btn btn-teal btn-lg" onclick="submitExam()">✅ Submit Exam</button>
+              </div>
+            </div>
+            <div style="position:sticky;top:80px">
+              <div class="card" style="margin-bottom:16px;text-align:center;padding:28px">
+                <div class="exam-timer-ring">
+                  <svg viewBox="0 0 140 140">
+                    <circle class="timer-bg" cx="70" cy="70" r="60" stroke-width="8"/>
+                    <circle class="timer-arc" id="timerArc" cx="70" cy="70" r="60" stroke-width="8" stroke="var(--teal)" stroke-dasharray="377" stroke-dashoffset="0"/>
+                  </svg>
+                  <div class="timer-text">
+                    <div class="timer-num" id="timerNum">30:00</div>
+                    <div class="timer-label">Remaining</div>
+                  </div>
+                </div>
+                <div id="timerStatus" style="font-family:var(--font-display);font-size:12px;color:var(--text-3)">Auto-submits on expiry</div>
+              </div>
+              <div class="card">
+                <div class="card-title" style="font-size:13px;margin-bottom:12px">Question Navigator</div>
+                <div id="qNav" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="examResultScreen" style="display:none">
+          <div class="card" style="text-align:center;padding:52px">
+            <div style="font-size:72px;margin-bottom:20px;animation:iconPulse 2s infinite">🎉</div>
+            <div class="card-title" style="font-size:30px;letter-spacing:-1px;margin-bottom:8px">Exam Submitted!</div>
+            <div id="examResultContent"></div>
+            <div style="display:flex;gap:12px;justify-content:center;margin-top:32px">
+              <button class="btn btn-teal btn-lg" onclick="showSection('performance')">View Analytics</button>
+              <button class="btn btn-ghost btn-lg" onclick="resetExam()">Take Another</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── HOMEWORK ── -->
+      <div class="section" id="sec-homework">
+        <div class="g21" style="align-items:start">
+          <div class="card">
+            <div class="card-head"><div class="card-title">📤 Submit Assignment</div></div>
+            <form onsubmit="submitHomework(event)" style="display:grid;gap:14px">
+              <div>
+                <label class="f-label">Subject</label>
+                <select class="f-select" id="hwSubject" required>
+                  <option value="">— Select Subject —</option>
+                  <option>Mathematics</option><option>Physics</option><option>Chemistry</option>
+                  <option>Biology</option><option>English</option><option>History</option><option>Computer Science</option>
+                </select>
+              </div>
+              <div>
+                <label class="f-label">Assignment Title</label>
+                <input class="f-input" id="hwTitle" placeholder="e.g., Chapter 5 Practice Problems" required>
+              </div>
+              <div>
+                <label class="f-label">Notes (Optional)</label>
+                <textarea class="f-textarea" id="hwDesc" placeholder="Any additional info..." style="min-height:70px"></textarea>
+              </div>
+              <div>
+                <label class="f-label">Upload File</label>
+                <div class="upload-zone" id="uploadZone"
+                  onclick="document.getElementById('hwFile').click()"
+                  ondragover="handleDragOver(event)"
+                  ondragleave="handleDragLeave(event)"
+                  ondrop="handleDrop(event)">
+                  <span class="upload-icon">🌿</span>
+                  <div class="upload-text" id="uploadText">Drop file here or click to browse</div>
+                  <div class="upload-hint">PDF · JPG · PNG · DOC — Max 10MB</div>
+                </div>
+                <input type="file" id="hwFile" style="display:none" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" onchange="handleFileSelect(this)">
+              </div>
+              <button type="submit" class="btn btn-teal" style="width:100%;padding:12px;font-size:14px" id="hwBtn">📤 Submit Assignment</button>
+              <div id="hwMsg"></div>
+            </form>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-head"><div class="card-title">📋 Submission History</div></div>
+              <div id="hwHistory"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PERFORMANCE ── -->
+      <div class="section" id="sec-performance">
+        <div class="stats-row" id="perfStats"></div>
+        <div class="g2">
+          <div class="card">
+            <div class="card-head"><div class="card-title">📊 Score by Subject</div></div>
+            <div class="chart-wrap" style="height:260px"><canvas id="chartPerfBar"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><div class="card-title">📈 Score Trend</div></div>
+            <div class="chart-wrap" style="height:260px"><canvas id="chartPerfLine"></canvas></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">📋 Full Test History</div></div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Subject</th><th>Score</th><th>Total</th><th>%</th><th>Grade</th><th>Date</th></tr></thead>
+              <tbody id="perfTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── AI PREDICTION ── -->
+      <div class="section" id="sec-prediction">
+        <div id="predContent">
+          <div class="empty"><span class="empty-icon">🤖</span><div class="empty-title">Loading AI Analysis...</div></div>
+        </div>
+      </div>
+
+      <!-- ── LEADERBOARD ── -->
+      <div class="section" id="sec-leaderboard">
+        <div class="g21" style="align-items:start">
+          <div class="card">
+            <div class="card-head"><div class="card-title">🏆 Class Rankings</div></div>
+            <div id="leaderboardList"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><div class="card-title">📊 Score Distribution</div></div>
+            <div class="chart-wrap" style="height:260px"><canvas id="chartLBDist"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SCHEDULE ── -->
+      <div class="section" id="sec-schedule">
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-head">
+            <div>
+              <div class="card-title">📅 Weekly Class Schedule</div>
+              <div class="card-sub" id="scheduleClass">Class —</div>
+            </div>
+          </div>
+          <div id="scheduleGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:4px"></div>
+        </div>
+      </div>
+
+    </div><!-- end page -->
+  </main>
+</div>
+
+<div class="toast-box" id="toastBox"></div>
+
+<script src="../js/app.js"></script>
+<script src="../js/student.js"></script>
+<div id="ann-panel"></div>
+<div id="ann-toasts"></div>
+<script src="../js/announce.js"></script>
+</body>
+</html>
