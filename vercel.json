@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "app.js", "use": "@vercel/node" }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/app.js" },
+    { "src": "/auth/(.*)", "dest": "/app.js" },
+    { "src": "/aurora.css", "dest": "/aurora.css" },
+    { "src": "/admin.js", "dest": "/admin.js" },
+    { "src": "/student.js", "dest": "/student.js" },
+    { "src": "/teacher.js", "dest": "/teacher.js" },
+    { "src": "/Announce.js", "dest": "/Announce.js" },
+    { "src": "/admin.html", "dest": "/admin.html" },
+    { "src": "/student.html", "dest": "/student.html" },
+    { "src": "/teacher.html", "dest": "/teacher.html" },
+    { "src": "/", "dest": "/index.html" },
+    { "src": "/(.*)", "dest": "/app.js" }
+  ]
+}
