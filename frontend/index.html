@@ -279,6 +279,16 @@ async function doRegister(e) {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
+    
+    // If student is pending approval
+    if (data.pending) {
+      msg.innerHTML = '⏳ Registration successful!<br>Your account is <b>pending mentor approval</b>.<br>You will be able to login once a mentor approves you.';
+      msg.className = 'form-msg success';
+      btn.textContent = 'Awaiting Approval...';
+      btn.disabled = true;
+      return;
+    }
+
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data.user));
     msg.textContent = '✅ Account created! Redirecting...';
