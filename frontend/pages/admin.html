@@ -42,6 +42,7 @@
 
   <main class="main">
     <div class="topbar">
+      <button class="hamburger" id="hamburger" onclick="toggleSidebar()">?</button>
       <div class="topbar-left">
         <div class="topbar-title" id="topbarTitle">Admin Dashboard</div>
         <div class="topbar-sub" id="topbarSub">System Overview</div>
@@ -270,7 +271,14 @@
   </div>
 </div>
 
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 <div class="toast-box" id="toastBox"></div>
+<script>
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+</script>
 <script src="../js/app.js"></script>
 <script src="../js/admin.js"></script>
 <div id="ann-panel"></div>

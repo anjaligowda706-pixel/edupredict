@@ -1,106 +1,79 @@
-const express = require('express');
+﻿const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { v4: uuidv4 } = require('uuid');
+const User = require('../models/User');
 const { auth } = require('../middleware/auth');
 
 const SECRET = process.env.JWT_SECRET || 'edupredict_fallback_secret';
-const token = (u) => jwt.sign({ id: u._id||u.id, email: u.email, role: u.role, name: u.name }, SECRET, { expiresIn: '7d' });
-const safe = (u) => { const o = {...u}; delete o.password; return o; };
+const token = (u) => jwt.sign({ id: u._id, email: u.email, role: u.role, name: u.name }, SECRET, { expiresIn: '7d' });
+const safe = (u) => { const o = u.toObject(); delete o.password; return o; };
 
-// LOGIN - blocks student if not approved
+// LOGIN
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
-    const user = global.db.users.find(u => u.email === email.toLowerCase() && u.isActive !== false);
+    const user = await User.findOne({ email: email.toLowerCase(), isActive: true });
     if (!user) return res.status(401).json({ error: 'Invalid credentials' });
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) return res.status(401).json({ error: 'Invalid credentials' });
-
-    // Block student login if not approved by mentor
-    if (user.role === 'student') {
-      if (user.approvalStatus === 'pending') {
-        return res.status(403).json({ error: 'Your account is pending mentor approval. Please wait.' });
-      }
-      if (user.approvalStatus === 'rejected') {
-        return res.status(403).json({ error: 'Your registration was rejected. Please contact admin.' });
-      }
+    if (user.role === 'student' && user.approvalStatus === 'pending') {
+      return res.status(403).json({ error: 'Your account is pending mentor approval.' });
     }
-
+    if (user.role === 'student' && user.approvalStatus === 'rejected') {
+      return res.status(403).json({ error: 'Your registration was rejected. Contact admin.' });
+    }
     user.lastLogin = new Date();
+    await user.save();
     res.json({ success: true, token: token(user), user: safe(user) });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// REGISTER - students start as 'pending'
+// REGISTER
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, role, studentId, teacherId, class: cls, section, mentorId } = req.body;
-    if (global.db.users.find(u => u.email === email.toLowerCase())) {
-      return res.status(400).json({ error: 'Email already exists' });
-    }
+    const { name, email, password, role, studentId, teacherId, class: cls, section } = req.body;
+    const exists = await User.findOne({ email: email.toLowerCase() });
+    if (exists) return res.status(400).json({ error: 'Email already exists' });
     const isStudent = (role || 'student') === 'student';
-    const newUser = {
-      _id: uuidv4(), id: uuidv4(), name, email: email.toLowerCase(),
+    const user = await User.create({
+      name, email: email.toLowerCase(),
       password: await bcrypt.hash(password, 10),
-      role: role || 'student', studentId, teacherId,
-      class: cls, section, isActive: true, attendance: 85,
-      subjects: [], createdAt: new Date(), lastLogin: new Date(),
+      role: role || 'student',
+      studentId, teacherId, class: cls, section,
       approvalStatus: isStudent ? 'pending' : 'approved',
-      mentorId: mentorId || null
-    };
-    global.db.users.push(newUser);
-
+      lastLogin: new Date()
+    });
     if (isStudent) {
-      return res.status(201).json({ 
-        success: true, 
-        pending: true,
-        message: 'Registration successful! Waiting for mentor approval.' 
-      });
+      return res.status(201).json({ success: true, pending: true, message: 'Registration successful! Waiting for mentor approval.' });
     }
-    res.status(201).json({ success: true, token: token(newUser), user: safe(newUser) });
+    res.status(201).json({ success: true, token: token(user), user: safe(user) });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// GET PENDING STUDENTS (mentor/admin only)
-router.get('/pending-students', auth, (req, res) => {
-  if (req.user.role !== 'teacher' && req.user.role !== 'admin') {
-    return res.status(403).json({ error: 'Access denied' });
-  }
-  const pending = global.db.users
-    .filter(u => u.role === 'student' && u.approvalStatus === 'pending')
-    .map(safe);
-  res.json({ success: true, students: pending });
-});
-
-// APPROVE OR REJECT STUDENT (mentor/admin only)
-router.put('/approve/:studentId', auth, (req, res) => {
-  if (req.user.role !== 'teacher' && req.user.role !== 'admin') {
-    return res.status(403).json({ error: 'Access denied' });
-  }
-  const { action } = req.body; // 'approved' or 'rejected'
-  const idx = global.db.users.findIndex(u => (u._id||u.id) === req.params.studentId);
-  if (idx === -1) return res.status(404).json({ error: 'Student not found' });
-  global.db.users[idx].approvalStatus = action;
-  res.json({ success: true, message: `Student ${action} successfully.` });
-});
-
 // GET ME
-router.get('/me', auth, (req, res) => {
-  const u = global.db.users.find(u => (u._id||u.id) === req.user.id);
-  if (!u) return res.status(404).json({ error: 'Not found' });
-  res.json({ success: true, user: safe(u) });
+router.get('/me', auth, async (req, res) => {
+  try {
+    const u = await User.findById(req.user.id);
+    if (!u) return res.status(404).json({ error: 'Not found' });
+    res.json({ success: true, user: safe(u) });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// UPDATE PROFILE
-router.put('/profile', auth, async (req, res) => {
-  const idx = global.db.users.findIndex(u => (u._id||u.id) === req.user.id);
-  if (idx === -1) return res.status(404).json({ error: 'Not found' });
-  const { name, phone, bio } = req.body;
-  global.db.users[idx] = { ...global.db.users[idx], name, phone, bio };
-  res.json({ success: true, user: safe(global.db.users[idx]) });
+// PENDING STUDENTS
+router.get('/pending-students', auth, async (req, res) => {
+  if (req.user.role !== 'teacher' && req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
+  const students = await User.find({ role: 'student', approvalStatus: 'pending' }).select('-password');
+  res.json({ success: true, students });
+});
+
+// APPROVE/REJECT
+router.put('/approve/:studentId', auth, async (req, res) => {
+  if (req.user.role !== 'teacher' && req.user.role !== 'admin') return res.status(403).json({ error: 'Access denied' });
+  const { action } = req.body;
+  await User.findByIdAndUpdate(req.params.studentId, { approvalStatus: action });
+  res.json({ success: true, message: 'Student ' + action });
 });
 
 module.exports = router;

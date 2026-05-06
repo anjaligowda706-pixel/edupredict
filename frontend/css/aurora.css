@@ -649,3 +649,47 @@ tbody td { padding: 12px 13px; font-size: 13.5px; vertical-align: middle; }
   .metric-row { gap: 16px; }
   .login-left { padding: 28px 18px; }
 }
+/* ═══ MOBILE SIDEBAR TOGGLE ═══ */
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 36px; height: 36px;
+    background: var(--gray-50);
+    border: 1px solid var(--border2);
+    border-radius: var(--r-md);
+    cursor: pointer;
+    font-size: 18px;
+    color: var(--text-2);
+  }
+
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 199;
+  }
+
+  .sidebar-overlay.open { display: block; }
+}
+/* --- HAMBURGER MOBILE --- */
+.hamburger {
+  display: none;
+  align-items: center; justify-content: center;
+  width: 36px; height: 36px;
+  background: var(--gray-50);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-md);
+  cursor: pointer; font-size: 18px;
+  color: var(--text-2); flex-shrink: 0;
+}
+.sidebar-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45); z-index: 199;
+}
+.sidebar-overlay.open { display: block; }
+@media (max-width: 768px) {
+  .hamburger { display: flex !important; }
+}

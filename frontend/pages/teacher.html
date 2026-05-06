@@ -45,6 +45,10 @@
 
   <main class="main">
     <div class="topbar">
+      <button class="hamburger" id="hamburger" onclick="toggleSidebar()">?</button>
+      <div class="topbar-left">
+        <button class="hamburger" id="hamburger" onclick="toggleSidebar()">☰</button>
+      <button class="hamburger" id="hamburger" onclick="toggleSidebar()">?</button>
       <div class="topbar-left">
         <div class="topbar-title" id="topbarTitle">Dashboard</div>
         <div class="topbar-sub" id="topbarSub">Teacher overview</div>
@@ -240,11 +244,33 @@
   </div>
 </div>
 
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 <div class="toast-box" id="toastBox"></div>
+<script>
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+</script>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="toast-box" id="toastBox"></div>
+<script>
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+</script>
 <script src="../js/app.js"></script>
 <script src="../js/teacher.js"></script>
 <div id="ann-panel"></div>
 <div id="ann-toasts"></div>
 <script src="../js/announce.js"></script>
+<script>
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+</script>
 </body>
 </html>
