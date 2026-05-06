@@ -23,13 +23,22 @@ const { loadDB, saveDB } = require('./utils/db');
 loadDB();
 
 // MongoDB (optional)
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/edupredict_v2')
-  .then(() => console.log('✅ MongoDB Connected'))
-  .catch(() => console.log('📦 Using in-memory store'));
-
-// Seed data
 const { seedData } = require('./utils/seed');
-seedData().then(() => { global.dbReady = true; console.log('✅ Data seeded'); });
+
+// MongoDB (optional) — seed AFTER connection
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/edupredict_v2')
+  .then(async () => {
+    console.log('✅ MongoDB Connected');
+    await seedData();
+    global.dbReady = true;
+    console.log('✅ Data seeded');
+  })
+  .catch(async () => {
+    console.log('📦 Using in-memory store');
+    await seedData();
+    global.dbReady = true;
+    console.log('✅ Data seeded');
+  });
 
 // Routes
 app.use('/api/auth',          require('./routes/auth'));
