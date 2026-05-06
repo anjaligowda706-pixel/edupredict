@@ -306,7 +306,9 @@ async function doRegister(e) {
 const u = localStorage.getItem('user');
 if (u && localStorage.getItem('token')) {
   const user = JSON.parse(u);
-  window.location.href = `/pages/${user.role}.html`;
+  fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } })
+    .then(r => { if (r.ok) window.location.href = '/pages/' + user.role + '.html'; else localStorage.clear(); })
+    .catch(() => localStorage.clear());
 }
 </script>
 </body>
