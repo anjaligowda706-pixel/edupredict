@@ -36,7 +36,7 @@ function logout() {
   localStorage.clear();
   if (saved) localStorage.setItem(key, saved);
   window.location.href = "/index.html";
-  window.location.href = '/index.html';
+  localStorage.clear(); sessionStorage.clear(); window.location.replace('/index.html?t=' + Date.now());
 }
 
 async function apiFetch(path, opts = {}) {
@@ -484,9 +484,9 @@ function initUserInfo() {
   if (!user) { logout(); return null; }
 
   const path = window.location.pathname;
-  if (path.includes('/admin') && user.role !== 'admin') { window.location.href = '/index.html'; return null; }
-  if (path.includes('/teacher') && user.role !== 'teacher') { window.location.href = '/index.html'; return null; }
-  if (path.includes('/student') && user.role !== 'student') { window.location.href = '/index.html'; return null; }
+  if (path.includes('/admin') && user.role !== 'admin') { localStorage.clear(); sessionStorage.clear(); window.location.replace('/index.html?t=' + Date.now()); return null; }
+  if (path.includes('/teacher') && user.role !== 'teacher') { localStorage.clear(); sessionStorage.clear(); window.location.replace('/index.html?t=' + Date.now()); return null; }
+  if (path.includes('/student') && user.role !== 'student') { localStorage.clear(); sessionStorage.clear(); window.location.replace('/index.html?t=' + Date.now()); return null; }
 
   const avEl = document.getElementById('sbAvatar');
   const nameEl = document.getElementById('sbName');
