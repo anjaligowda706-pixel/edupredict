@@ -35,6 +35,7 @@ function logout() {
   const saved   = localStorage.getItem(key);
   localStorage.clear();
   if (saved) localStorage.setItem(key, saved);
+  window.location.href = "/index.html";
   window.location.href = '/';
 }
 
