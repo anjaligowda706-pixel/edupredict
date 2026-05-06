@@ -35,8 +35,7 @@ function logout() {
   const saved   = localStorage.getItem(key);
   localStorage.clear();
   if (saved) localStorage.setItem(key, saved);
-  window.location.href = "/index.html";
-  localStorage.clear(); sessionStorage.clear(); window.location.replace('/index.html?t=' + Date.now());
+  window.location.replace('/index.html?t=' + Date.now());
 }
 
 async function apiFetch(path, opts = {}) {
